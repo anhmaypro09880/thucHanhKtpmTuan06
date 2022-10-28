@@ -13,6 +13,7 @@ import {
     FlatList,
 } from "react-native";
 import connect1 from "../api/connect1";
+import { useEffect } from "react";
 // import Swipeout from "react-native-swipeout";
 
 const FlatListIteam = ({ item, index, data }) => {
@@ -70,15 +71,22 @@ const FlatListIteam = ({ item, index, data }) => {
                             }}
                             onPress={() => {
                                 console.log(item.id);
-                                connect1
-                                    .delete(
-                                        "https://6348d9a30b382d796c7881ef.mockapi.io/comments" +
-                                            item.id,
-                                        {}
-                                    )
-                                    .then((result) => {
-                                        data = result.data;
-                                        // setOutputs(result.data);
+                                fetch(
+                                    "https://6348d9a30b382d796c7881ef.mockapi.io/comments" +
+                                        item.id,
+                                    {
+                                        method: "DELETE",
+                                        headers: {
+                                            "Content-Type": "application/json",
+                                        },
+                                    }
+                                )
+                                    .then(() => item)
+                                    .then((item) => {
+                                        data = data.filter(
+                                            (ite) => ite !== item
+                                        );
+                                        // console.log(list);
                                     });
                             }}
                         >
@@ -98,33 +106,23 @@ export default function ToDoList() {
     const [jobs, setJobs] = useState([]);
     const [outputs, setOutputs] = useState();
 
-    //    const  getList= () =>{
-    //     axios({
-    //         url:"https://6348d9a30b382d796c7881ef.mockapi.io/comments",
-    //         method:"GET"
-    //     }).then((res) =>{
-    //         var respone = res.data;
-    //         setOutputs(respone.data);
-    //     })
-    //     }
-    // }
-
-    const request = connect1
-        .get("https://6348d9a30b382d796c7881ef.mockapi.io/comments", {})
-        .then((result) => {
-            setOutputs(result.data);
-        })
-        .catch(function (error) {
-            console.log(
-                "There has been a problem with your fetch operation: " +
-                    error.message
+    const getDataMock = async () => {
+        try {
+            const response = await fetch(
+                "https://6348d9a30b382d796c7881ef.mockapi.io/comments"
             );
-            // ADD THIS THROW error
-            throw error;
-        });
-    // console.log(outputs);
+            const json = await response.json();
+            setOutputs(json);
+        } catch (error) {
+            console.log(error);
+        } finally {
+            // setLoading(false);
+        }
+    };
+    useEffect(() => {
+        getDataMock();
+    }, []);
 
-    // console.log(outputs);
     const renderItem = ({ item, index }) => {
         return (
             <FlatListIteam
